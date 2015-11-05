@@ -13,21 +13,35 @@ if __name__ == "__main__":
             exit("Error while executing:\n\t %s" % command)
 
     if platform.system() == "Windows":
-        compiler = '-s compiler="Visual Studio" -s compiler.version=12 -s compiler.runtime=MT '
+        compiler = '-s compiler="Visual Studio" -s compiler.version=12 '
+        # Static x86
+        test(compiler + '-s arch=x86 -s build_type=Debug -s compiler.runtime=MDd -o hpx:shared=False')
+        test(compiler + '-s arch=x86 -s build_type=Release -s compiler.runtime=MD -o hpx:shared=False')
+
+        # Static x86_64
+        test(compiler + '-s arch=x86_64 -s build_type=Debug -s compiler.runtime=MDd -o hpx:shared=False')
+        test(compiler + '-s arch=x86_64 -s build_type=Release -s compiler.runtime=MD -o hpx:shared=False')
+
+        # Shared x86
+        test(compiler + '-s arch=x86 -s build_type=Debug -s compiler.runtime=MDd -o hpx:shared=True')
+        test(compiler + '-s arch=x86 -s build_type=Release -s compiler.runtime=MD -o hpx:shared=True')
+
+        # Shared x86_64
+        test(compiler + '-s arch=x86_64 -s build_type=Debug -s compiler.runtime=MDd -o hpx:shared=True')
+        test(compiler + '-s arch=x86_64 -s build_type=Release -s compiler.runtime=MD -o hpx:shared=True')
+
     else:  # Compiler and version not specified, please set it in your home/.conan/conan.conf (Valid for Macos and Linux)
-        compiler = ""
-
-    # x86_64 
-    test(compiler + '-s build_type=Debug -s arch=x86_64 -o SDL2:shared=True')
-    test(compiler + '-s build_type=Release -s arch=x86_64 -o SDL2:shared=True')
-    if platform.system() != "Darwin": # Don't know why but fails linkage in OSX for static libs
-        test(compiler + '-s build_type=Debug -s arch=x86_64 -o SDL2:shared=False')
-        test(compiler + '-s build_type=Release -s arch=x86_64 -o SDL2:shared=False')
-
-    # x86
-    test(compiler + '-s build_type=Debug -s arch=x86 -o SDL2:shared=True')
-    test(compiler + '-s build_type=Release -s arch=x86 -o SDL2:shared=True')
-    if platform.system() != "Darwin": # Don't know why but fails linkage in OSX for static libs
-        test(compiler + '-s build_type=Debug -s arch=x86 -o SDL2:shared=False')
-        test(compiler + '-s build_type=Release -s arch=x86 -o SDL2:shared=False')
-
+        # x86_64 
+        test('-s build_type=Debug -s arch=x86_64 -o hpx:shared=True')
+        test('-s build_type=Release -s arch=x86_64 -o hpx:shared=True')
+        if platform.system() != "Darwin": # Don't know why but fails linkage in OSX for static libs
+            test('-s build_type=Debug -s arch=x86_64 -o hpx:shared=False')
+            test('-s build_type=Release -s arch=x86_64 -o hpx:shared=False')
+    
+        # x86
+        test('-s build_type=Debug -s arch=x86 -o hpx:shared=True')
+        test('-s build_type=Release -s arch=x86 -o hpx:shared=True')
+        if platform.system() != "Darwin": # Don't know why but fails linkage in OSX for static libs
+            test('-s build_type=Debug -s arch=x86 -o hpx:shared=False')
+            test('-s build_type=Release -s arch=x86 -o hpx:shared=False')
+    
