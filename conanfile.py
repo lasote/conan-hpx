@@ -12,9 +12,9 @@ class HPXConan(ConanFile):
     options = {"shared": [True, False]}
     default_options = "shared=True"
     exports = "CMakeLists.txt"
-    generators = "cmake"
+    generators = "cmake", "txt"
     url="http://github.com/lasote/conan-hpx"
-    requires = "boost/1.59.0@lasote/stable", "hwloc/1.11.1@lasote/stable"
+    requires = "Boost/1.58.0@lasote/stable", "hwloc/1.11.1@lasote/stable"
 
     def config(self):
         pass
@@ -33,7 +33,13 @@ class HPXConan(ConanFile):
         """
         cmake = CMake(self.settings)
          # Build
+        self.replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "include(HPX_SetupBoost)", "")
+        self.replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "if(HPX_WITH_HWLOC)", "if(0)")
+        
+        
         self.run("cd %s &&  mkdir _build" % self.folder)
+        
+        self.output.warn(str(self.deps_cpp_info.include_paths))        
         configure_command = 'cd %s/_build && cmake .. %s' % (self.folder, cmake.command_line)
         self.output.warn("Configure with: %s" % configure_command)
         self.run(configure_command)

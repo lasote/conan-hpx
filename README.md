@@ -1,10 +1,10 @@
-[![Build Status](https://travis-ci.org/lasote/conan-sdl2.svg)](https://travis-ci.org/lasote/conan-sdl2)
+[![Build Status](https://travis-ci.org/lasote/conan-hpx.svg)](https://travis-ci.org/lasote/conan-hpx)
 
-# conan-sdl2
+# conan-hpx
 
-[Conan.io](https://conan.io) package for SDL2 library
+[Conan.io](https://conan.io) package for hpx library
 
-The packages generated with this **conanfile** can be found in [conan.io](https://conan.io/source/SDL2/2.0.3/lasote/stable).
+The packages generated with this **conanfile** can be found in [conan.io](https://conan.io/source/hpx/0.9.10/lasote/stable).
 
 ## Build packages
 
@@ -21,23 +21,23 @@ May be necessary to edit ~/.conan/conan.conf to set your *compiler* and *compile
     
 ## Upload packages to server
 
-    $ conan upload SDL2/2.0.3@lasote/stable --all
+    $ conan upload hpx/0.9.10@lasote/stable --all
     
 ## Reuse the packages
 
 ### Basic setup
 
-    $ conan install SDL2/2.0.3@lasote/stable
+    $ conan install hpx/0.9.10@lasote/stable
     
 ### Project setup
 
 If you handle multiple dependencies in your project is better to add a *conanfile.txt*
     
     [requires]
-    SDL2/2.0.3@lasote/stable
+    hpx/0.9.10@lasote/stable
 
     [options]
-    SDL2:shared=true # false
+    hpx:shared=true # false
     
     [generators]
     txt
