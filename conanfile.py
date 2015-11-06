@@ -3,6 +3,7 @@ from conans.tools import download, unzip
 import os
 import shutil
 from conans import CMake
+from uuid import lib
 
 class HPXConan(ConanFile):
     name = "hpx"
@@ -19,6 +20,12 @@ class HPXConan(ConanFile):
     def config(self):
         pass
     
+    def system_requirements(self):
+        if self.settings.os == "Linux": # TODO: only apt
+            self.run("sudo apt-get install google-perftools || true")
+            # It seems that its not created the symlink properly to normal so and cmake doesnt find it
+            self.run("sudo ln -s /usr/lib/libtcmalloc.so.4 /usr/lib/libtcmalloc.so || true")
+    
     def source(self):
         
         zip_name = "hpx_%s.zip" % self.version
@@ -32,18 +39,47 @@ class HPXConan(ConanFile):
             to reuse it later in any other project.
         """
         cmake = CMake(self.settings)
-         # Build
-        self.replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "include(HPX_SetupBoost)", "")
-        self.replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "if(HPX_WITH_HWLOC)", "if(0)")
+        # Get boost serialization library name
+        serialization_lib_name = ""
+        for lib in self.deps_cpp_info.libs:
+            if "serialization" in lib: # From Boost dependency
+                serialization_lib_name = lib
+                break
         
         
+        # Build
+        
+        #Hacks for link with out boost and hwloc
+        boost_version = "SET(Boost_VERSION 105800)"
+        boost_found = "SET(Boost_FOUND TRUE)"
+        boost_libraries = "SET(Boost_LIBRARIES %s)" % " ".join(self.deps_cpp_info.libs)
+        boost_include_dir = "SET(Boost_INCLUDE_DIR %s)" % self.get_include_dir("Boost")
+        replace_line = "\n%s\n%s\n%s\n%s\n\n" % (boost_version, boost_found, boost_libraries, boost_include_dir)
+        
+        self.replace_in_file("%s/cmake/HPX_SetupBoost.cmake" % self.folder, "find_package(Boost", "SET(DONTWANTTOFINDBOOST") # Not find boost, i have it
+        self.replace_in_file("%s/cmake/HPX_SetupBoost.cmake" % self.folder, "if(NOT Boost_FOUND)", "%sif(NOT Boost_FOUND)" % replace_line) # Not find boost, i have it
+        
+        
+        hwloc_found = "SET(HWLOC_FOUND TRUE)"
+        hwloc_libraries = "SET(HWLOC_LIBRARIES %s)" % " ".join(self.deps_cpp_info.libs)
+        hwloc_include_dir = "SET(HWLOC_INCLUDE_DIR %s)" % self.get_include_dir("hwloc")
+        replace_line = "\n%s\n%s\n%s\n\n" % (hwloc_found, hwloc_libraries, hwloc_include_dir)
+        
+        self.replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "find_package(Hwloc)", 'MESSAGE("hwloc found by conan")\n%s' % replace_line) # Not find hwloc, i have it
+        
+        # OTHER REPLACES
+        self.replace_in_file("%s/src/CMakeLists.txt" % self.folder, "if(NOT MSVC)", "if(0)") # Not handle boost Boost_SYSTEM_LIBRARY_DEBUG or Boost_SYSTEM_SERIALIZATION_DEBUG
+        self.replace_in_file("%s/src/CMakeLists.txt" % self.folder, "${hpx_MALLOC_LIBRARY}", "${hpx_MALLOC_LIBRARY} %s" % serialization_lib_name) # Not append boost libs
+        
+        
+        # CONFIGURE
         self.run("cd %s &&  mkdir _build" % self.folder)
-        
-        self.output.warn(str(self.deps_cpp_info.include_paths))        
-        configure_command = 'cd %s/_build && cmake .. %s' % (self.folder, cmake.command_line)
+        configure_command = 'cd %s/_build && cmake .. %s ' % (self.folder, cmake.command_line)
         self.output.warn("Configure with: %s" % configure_command)
         self.run(configure_command)
-        self.run("cd %s/_build && cmake --build . %s" % (self.folder, cmake.build_config))
+        # BUILD
+        cores = "-j3" if self.settings.os == "Linux" else "-m4"
+        self.run("cd %s/_build && cmake --build . %s -- %s" % (self.folder, cmake.build_config, cores))
 
     def replace_in_file(self, file_path, search, replace):
         with open(file_path, 'r') as content_file:
@@ -51,6 +87,12 @@ class HPXConan(ConanFile):
             content = content.replace(search, replace)
         with open(file_path, 'wb') as handle:
             handle.write(content)
+            
+    def get_include_dir(self, require_name):
+        for thedir in self.deps_cpp_info.includedirs:
+            if require_name in thedir:
+                return thedir
+        return "" 
 
     def package(self):
         """ Define your conan structure: headers, libs and data. After building your
