@@ -101,8 +101,6 @@ class HPXConan(ConanFile):
         self.copy(pattern="*", dst="include/", src="%s/external/endian" % self.folder, keep_path=True)
         self.copy(pattern="*", dst="include/hpx", src="%s/hpx" % self.folder, keep_path=True)
         
-        self.cpp_info.defines.extend(["HPX_COMPONENT_EXPORTS", "HPX_ENABLE_ASSERT_HANDLER"])
-        
         self.copy(pattern="*.lib", dst="lib", src="%s/_build/lib" % self.folder, keep_path=False)
         self.copy(pattern="*.a", dst="lib", src="%s/_build/lib" % self.folder, keep_path=False)
         self.copy(pattern="*.so", dst="lib", src="%s/_build/lib" % self.folder, keep_path=False)
@@ -110,8 +108,26 @@ class HPXConan(ConanFile):
         self.copy(pattern="*.dylib*", dst="lib", src="%s/_build/lib" % self.folder, keep_path=False)
         
         self.copy(pattern="*.dll", dst="bin", src="%s/_build/lib" % self.folder, keep_path=False)
+        
+        # Copy compilation tools
+        self.copy(pattern="*", dst="resources/pkgconfig", src="%s/_build/lib/pkgconfig" % self.folder, keep_path=True)
+        self.copy(pattern="*", dst="resources/pkgconfig", src="%s/_build/lib/pkgconfig" % self.folder, keep_path=True)
        
     def package_info(self):  
                 
-        self.cpp_info.libs = ["hpx", "hpx_serialization"]
+        self.cpp_info.libs = ["hpx", "hpx_serialization", "ag", "binpacking_factory", "cancelable_action", "component_storage", "distributing_factory",
+                              "iostreams", "jacobi_component", "managed_accumulator", "memory", "nqueen", "parcel_coalescing", "random_mem_access", "remote_object",
+                              "simple_accumulator", "simple_central_tuplespace", "sine", "startup_shutdown", "template_function_accumulator", "throttle", "unordered",
+                              "vector"]
+        
+        if self.settings.build_type == "Debug":
+            self.cpp_info.libs = [lib + "d" for lib in self.cpp_info.libs]
+            
+        
+        if self.settings.os == "Linux":
+            self.cpp_info.libs.extend(["pthread","iostreams"])
+        
         self.cpp_info.cflags = ["-std=c++11"]
+        self.cpp_info.cppflags = ["-std=c++11"]
+        
+        self.cpp_info.defines.extend(["HPX_COMPONENT_EXPORTS", "HPX_ENABLE_ASSERT_HANDLER"])

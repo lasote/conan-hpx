@@ -23,12 +23,8 @@ if __name__ == "__main__":
         test(compiler + '-s arch=x86_64 -s build_type=Release -s compiler.runtime=MD')
 
     else:  # Compiler and version not specified, please set it in your home/.conan/conan.conf (Valid for Macos and Linux)
-        # x86_64 
-        test('-s build_type=Debug -s arch=x86_64')
         test('-s build_type=Release -s arch=x86_64')
-    
-        # x86
-        test('-s build_type=Debug -s arch=x86')
         test('-s build_type=Release -s arch=x86')
-
-    
+        
+        test('-s build_type=Debug -s arch=x86_64')
+        test('-s build_type=Debug -s arch=x86')
