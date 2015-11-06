@@ -10,8 +10,6 @@ class HPXConan(ConanFile):
     version = "0.9.10"
     folder = "hpx_%s" % version
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False]}
-    default_options = "shared=True"
     exports = "CMakeLists.txt"
     generators = "cmake", "txt"
     url="http://github.com/lasote/conan-hpx"
@@ -98,22 +96,22 @@ class HPXConan(ConanFile):
         """ Define your conan structure: headers, libs and data. After building your
             project, this method is called to create a defined structure:
         """
-        self.copy(pattern="*.h", dst="include", src="%s/_build/include" % self.folder, keep_path=False)
-        self.copy(pattern="*.h", dst="include", src="%s/include" % self.folder, keep_path=False)
+        self.copy(pattern="*", dst="include/hpx", src="%s/_build/hpx" % self.folder, keep_path=True)
+        self.copy(pattern="*", dst="include/", src="%s/external/cache" % self.folder, keep_path=True)
+        self.copy(pattern="*", dst="include/", src="%s/external/endian" % self.folder, keep_path=True)
+        self.copy(pattern="*", dst="include/hpx", src="%s/hpx" % self.folder, keep_path=True)
         
-        # Win
-        self.copy(pattern="*.dll", dst="bin", src="%s/_build/" % self.folder, keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", src="%s/_build/" % self.folder, keep_path=False)
+        self.cpp_info.defines.extend(["HPX_COMPONENT_EXPORTS", "HPX_ENABLE_ASSERT_HANDLER"])
         
-        # UNIX
-        if self.settings.os != "Windows":
-            if not self.options.shared:
-                self.copy(pattern="*.a", dst="lib", src="%s/build/" % self.folder, keep_path=False)
-                self.copy(pattern="*.a", dst="lib", src="%s/build/.libs/" % self.folder, keep_path=False)   
-            else:
-                self.copy(pattern="*.so*", dst="lib", src="%s/build/.libs/" % self.folder, keep_path=False)
-                self.copy(pattern="*.dylib*", dst="lib", src="%s/build/.libs/" % self.folder, keep_path=False)
-
+        self.copy(pattern="*.lib", dst="lib", src="%s/_build/lib" % self.folder, keep_path=False)
+        self.copy(pattern="*.a", dst="lib", src="%s/_build/lib" % self.folder, keep_path=False)
+        self.copy(pattern="*.so", dst="lib", src="%s/_build/lib" % self.folder, keep_path=False)
+        self.copy(pattern="*.so.*", dst="lib", src="%s/_build/lib" % self.folder, keep_path=False)
+        self.copy(pattern="*.dylib*", dst="lib", src="%s/_build/lib" % self.folder, keep_path=False)
+        
+        self.copy(pattern="*.dll", dst="bin", src="%s/_build/lib" % self.folder, keep_path=False)
+       
     def package_info(self):  
                 
-        self.cpp_info.libs = ["hpx"]
+        self.cpp_info.libs = ["hpx", "hpx_serialization"]
+        self.cpp_info.cflags = ["-std=c++11"]
