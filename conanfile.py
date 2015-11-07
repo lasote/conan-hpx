@@ -13,7 +13,7 @@ class HPXConan(ConanFile):
     exports = "CMakeLists.txt"
     generators = "cmake", "txt"
     url="http://github.com/lasote/conan-hpx"
-    requires = "Boost/1.58.0@lasote/stable", "hwloc/1.11.1@lasote/stable"
+    requires = "Boost/1.57.0@lasote/stable", "hwloc/1.11.1@lasote/stable"
 
     def config(self):
         pass
@@ -49,7 +49,7 @@ class HPXConan(ConanFile):
         
         #Hacks for link with out boost and hwloc
         boost_version = "SET(Boost_VERSION 105800)"
-        boost_found = "SET(Boost_FOUND TRUE)"
+        boost_found = "SET(Boost_FOUND TRUE)\nSET(Boost_CONTEXT_FOUND TRUE)"
         boost_libraries = "SET(Boost_LIBRARIES %s)" % " ".join(self.deps_cpp_info.libs)
         boost_include_dir = "SET(Boost_INCLUDE_DIR %s)" % self.get_include_dir("Boost")
         replace_line = "\n%s\n%s\n%s\n%s\n\n" % (boost_version, boost_found, boost_libraries, boost_include_dir)
@@ -76,7 +76,7 @@ class HPXConan(ConanFile):
         self.output.warn("Configure with: %s" % configure_command)
         self.run(configure_command)
         # BUILD
-        cores = "-j3" if self.settings.os == "Linux" else "-m4"
+        cores = "-j3" if self.settings.os != "Windows" else "-m4"
         self.run("cd %s/_build && cmake --build . %s -- %s" % (self.folder, cmake.build_config, cores))
 
     def replace_in_file(self, file_path, search, replace):
