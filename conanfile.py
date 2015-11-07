@@ -13,7 +13,7 @@ class HPXConan(ConanFile):
     exports = "CMakeLists.txt"
     generators = "cmake", "txt"
     url="http://github.com/lasote/conan-hpx"
-    requires = "Boost/1.58.0@lasote/stable", "hwloc/1.11.1@lasote/stable"
+    requires = "Boost/1.57.0@lasote/stable", "hwloc/1.11.1@lasote/stable"
 
     def config(self):
         pass
