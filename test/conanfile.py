@@ -8,7 +8,7 @@ class DefaultNameConan(ConanFile):
     version = "0.1"
     settings = "os", "compiler", "build_type", "arch"
     requires = "hpx/0.9.10@lasote/stable"
-    generators = "cmake" # Generates conanbuildinfo.gcc with all deps information
+    generators = "cmake", "gcc" # Generates conanbuildinfo.gcc with all deps information
 
     def build(self):
         if self.settings.build_type == "Debug":

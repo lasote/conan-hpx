@@ -24,7 +24,8 @@ if __name__ == "__main__":
 
     else:  # Compiler and version not specified, please set it in your home/.conan/conan.conf (Valid for Macos and Linux)
         test('-s build_type=Release -s arch=x86_64')
-        test('-s build_type=Release -s arch=x86')
-        
         test('-s build_type=Debug -s arch=x86_64')
-        test('-s build_type=Debug -s arch=x86')
+        
+        if platform.system != "Darwin":
+            test('-s build_type=Debug -s arch=x86')
+            test('-s build_type=Release -s arch=x86')
