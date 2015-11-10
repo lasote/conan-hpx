@@ -48,7 +48,7 @@ class HPXConan(ConanFile):
         # Build
         
         #Hacks for link with out boost and hwloc
-        boost_version = "SET(Boost_VERSION 105800)"
+        boost_version = "SET(Boost_VERSION 105700)"
         boost_found = "SET(Boost_FOUND TRUE)"
         boost_libraries = "SET(Boost_LIBRARIES %s)" % " ".join(self.deps_cpp_info.libs)
         boost_include_dir = "SET(Boost_INCLUDE_DIR %s)" % self.get_include_dir("Boost")
@@ -125,7 +125,8 @@ class HPXConan(ConanFile):
             
         
         if self.settings.os == "Linux":
-            self.cpp_info.libs.extend(["pthread","iostreams"])
+            #self.cpp_info.libs.extend(["pthread","iostreams"])
+            pass
         
         self.cpp_info.cflags = ["-std=c++11"]
         self.cpp_info.cppflags = ["-std=c++11"]
