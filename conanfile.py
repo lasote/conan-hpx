@@ -110,10 +110,10 @@ class HPXConan(ConanFile):
         self.copy(pattern="*", dst="include/hpx", src="%s/hpx" % self.folder, keep_path=True)
         
         self.copy(pattern="*.lib", dst="lib", src="%s/_build" % self.folder, keep_path=False)
-        self.copy(pattern="*.a", dst="lib", src="%s/_build/lib" % self.folder, keep_path=False)
-        self.copy(pattern="*.so", dst="lib", src="%s/_build/lib" % self.folder, keep_path=False)
-        self.copy(pattern="*.so.*", dst="lib", src="%s/_build/lib" % self.folder, keep_path=False)
-        self.copy(pattern="*.dylib*", dst="lib", src="%s/_build/lib" % self.folder, keep_path=False)
+        self.copy(pattern="*.a", dst="lib", src="%s/_build" % self.folder, keep_path=False)
+        self.copy(pattern="*.so", dst="lib", src="%s/_build" % self.folder, keep_path=False)
+        self.copy(pattern="*.so.*", dst="lib", src="%s/_build" % self.folder, keep_path=False)
+        self.copy(pattern="*.dylib*", dst="lib", src="%s/_build" % self.folder, keep_path=False)
         
         self.copy(pattern="*.dll", dst="bin", src="%s/_build" % self.folder, keep_path=False)
         
@@ -123,11 +123,15 @@ class HPXConan(ConanFile):
        
     def package_info(self):  
         # Windows removed (i think examples) => "ag" "cancelable_action" "jacobi_component" "managed_accumulator" and many others
-        self.cpp_info.libs = ["hpx", "hpx_init", "hpx_runtime", "hpx_serialization", 
+        self.cpp_info.libs = ["hpx", "hpx_init", "hpx_serialization", 
                               "binpacking_factory", "component_storage", "distributing_factory",
                               "iostreams",  "memory", "parcel_coalescing", "remote_object",
                               "unordered", "vector"]
         
+	if self.settings.os == "Windows":
+            self.cpp_info.libs.extend(["hpx_runtime"])
+
+
         if self.settings.build_type == "Debug":
             self.cpp_info.libs = [lib + "d" for lib in self.cpp_info.libs]
             
