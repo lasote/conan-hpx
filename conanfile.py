@@ -28,14 +28,15 @@ class HPXConan(ConanFile):
         
         zip_name = "hpx_%s.zip" % self.version
         download("http://stellar.cct.lsu.edu/files/%s" % zip_name, zip_name)
-        unzip(zip_name)
-        shutil.move("%s/CMakeLists.txt" % self.folder, "%s/CMakeListsOriginal.cmake" % self.folder)
-        shutil.move("CMakeLists.txt", "%s/CMakeLists.txt" % self.folder)
+        unzip(zip_name)        
 
     def build(self):
         """ Define your project building. You decide the way of building it
             to reuse it later in any other project.
         """
+        shutil.move("%s/CMakeLists.txt" % self.folder, "%s/CMakeListsOriginal.cmake" % self.folder)
+        shutil.move("CMakeLists.txt", "%s/CMakeLists.txt" % self.folder)
+        
         cmake = CMake(self.settings)
         # Get boost serialization library name
         serialization_lib_name = ""
@@ -46,6 +47,13 @@ class HPXConan(ConanFile):
         
         
         # Build
+        
+        # NO build examples nor tests
+        self.replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "if(HPX_BUILD_EXAMPLES)", "if(FALSE)")
+        self.replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "if(HPX_BUILD_DOCUMENTATION)", "if(FALSE)")
+        self.replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "if(HPX_BUILD_TESTS)", "if(FALSE)")
+        self.replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "if(HPX_BUILD_TOOLS)", "if(FALSE)")
+        
         
         #Hacks for link with out boost and hwloc
         boost_version = "SET(Boost_VERSION 105800)"
@@ -76,7 +84,7 @@ class HPXConan(ConanFile):
         self.output.warn("Configure with: %s" % configure_command)
         self.run(configure_command)
         # BUILD
-        cores = "-j3" if self.settings.os != "Windows" else "-m4"
+        cores = "-j3" if self.settings.os != "Windows" else ""
         self.run("cd %s/_build && cmake --build . %s -- %s" % (self.folder, cmake.build_config, cores))
 
     def replace_in_file(self, file_path, search, replace):
@@ -101,24 +109,24 @@ class HPXConan(ConanFile):
         self.copy(pattern="*", dst="include/", src="%s/external/endian" % self.folder, keep_path=True)
         self.copy(pattern="*", dst="include/hpx", src="%s/hpx" % self.folder, keep_path=True)
         
-        self.copy(pattern="*.lib", dst="lib", src="%s/_build/lib" % self.folder, keep_path=False)
+        self.copy(pattern="*.lib", dst="lib", src="%s/_build" % self.folder, keep_path=False)
         self.copy(pattern="*.a", dst="lib", src="%s/_build/lib" % self.folder, keep_path=False)
         self.copy(pattern="*.so", dst="lib", src="%s/_build/lib" % self.folder, keep_path=False)
         self.copy(pattern="*.so.*", dst="lib", src="%s/_build/lib" % self.folder, keep_path=False)
         self.copy(pattern="*.dylib*", dst="lib", src="%s/_build/lib" % self.folder, keep_path=False)
         
-        self.copy(pattern="*.dll", dst="bin", src="%s/_build/lib" % self.folder, keep_path=False)
+        self.copy(pattern="*.dll", dst="bin", src="%s/_build" % self.folder, keep_path=False)
         
         # Copy compilation tools
         self.copy(pattern="*", dst="resources/pkgconfig", src="%s/_build/lib/pkgconfig" % self.folder, keep_path=True)
         self.copy(pattern="*", dst="resources/pkgconfig", src="%s/_build/lib/pkgconfig" % self.folder, keep_path=True)
        
     def package_info(self):  
-                
-        self.cpp_info.libs = ["hpx", "hpx_serialization", "ag", "binpacking_factory", "cancelable_action", "component_storage", "distributing_factory",
-                              "iostreams", "jacobi_component", "managed_accumulator", "memory", "nqueen", "parcel_coalescing", "random_mem_access", "remote_object",
-                              "simple_accumulator", "simple_central_tuplespace", "sine", "startup_shutdown", "template_function_accumulator", "throttle", "unordered",
-                              "vector"]
+        # Windows removed (i think examples) => "ag" "cancelable_action" "jacobi_component" "managed_accumulator" and many others
+        self.cpp_info.libs = ["hpx", "hpx_init", "hpx_runtime", "hpx_serialization", 
+                              "binpacking_factory", "component_storage", "distributing_factory",
+                              "iostreams",  "memory", "parcel_coalescing", "remote_object",
+                              "unordered", "vector"]
         
         if self.settings.build_type == "Debug":
             self.cpp_info.libs = [lib + "d" for lib in self.cpp_info.libs]

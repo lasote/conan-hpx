@@ -14,13 +14,13 @@ if __name__ == "__main__":
 
     if platform.system() == "Windows":
         compiler = '-s compiler="Visual Studio" -s compiler.version=12 '
-        # Static x86
-        test(compiler + '-s arch=x86 -s build_type=Debug -s compiler.runtime=MDd')
-        test(compiler + '-s arch=x86 -s build_type=Release -s compiler.runtime=MD')
-
-        # Static x86_64
-        test(compiler + '-s arch=x86_64 -s build_type=Debug -s compiler.runtime=MDd')
+        # x86_64
+        #test(compiler + '-s arch=x86_64 -s build_type=Debug -s compiler.runtime=MDd')
         test(compiler + '-s arch=x86_64 -s build_type=Release -s compiler.runtime=MD')
+        
+        #  x86
+        #test(compiler + '-s arch=x86 -s build_type=Debug -s compiler.runtime=MDd')
+        test(compiler + '-s arch=x86 -s build_type=Release -s compiler.runtime=MD')
 
     else:  # Compiler and version not specified, please set it in your home/.conan/conan.conf (Valid for Macos and Linux)
         test('-s build_type=Release -s arch=x86_64')
