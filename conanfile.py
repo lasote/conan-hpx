@@ -22,6 +22,7 @@ class HPXConan(ConanFile):
         if self.settings.os == "Linux": # TODO: only apt
             self.run("sudo apt-get install google-perftools || true")
             # It seems that its not created the symlink properly to normal so and cmake doesnt find it
+            # !!!!!!!! we will need the libtcmalloc.so if its linked dynamically, try it
             self.run("sudo ln -s /usr/lib/libtcmalloc.so.4 /usr/lib/libtcmalloc.so || true")
     
     def source(self):
@@ -48,8 +49,13 @@ class HPXConan(ConanFile):
         # Build
         
         #Hacks for link with out boost and hwloc
-        boost_version = "SET(Boost_VERSION 105800)"
-        boost_found = "SET(Boost_FOUND TRUE)\nSET(Boost_CONTEXT_FOUND TRUE)"
+        boost_version = "SET(Boost_VERSION 105700)"
+        boost_found = '''SET(Boost_FOUND TRUE)
+SET(Boost_CONTEXT_FOUND TRUE)
+SET(Boost_MAJOR_VERSION 1)
+SET(Boost_MINOR_VERSION 57)
+SET(Boost_SUBMINOR_VERSION 0)
+'''
         boost_libraries = "SET(Boost_LIBRARIES %s)" % " ".join(self.deps_cpp_info.libs)
         boost_include_dir = "SET(Boost_INCLUDE_DIR %s)" % self.get_include_dir("Boost")
         replace_line = "\n%s\n%s\n%s\n%s\n\n" % (boost_version, boost_found, boost_libraries, boost_include_dir)
@@ -79,13 +85,6 @@ class HPXConan(ConanFile):
         cores = "-j3" if self.settings.os != "Windows" else "-m4"
         self.run("cd %s/_build && cmake --build . %s -- %s" % (self.folder, cmake.build_config, cores))
 
-    def replace_in_file(self, file_path, search, replace):
-        with open(file_path, 'r') as content_file:
-            content = content_file.read()
-            content = content.replace(search, replace)
-        with open(file_path, 'wb') as handle:
-            handle.write(content)
-            
     def get_include_dir(self, require_name):
         for thedir in self.deps_cpp_info.includedirs:
             if require_name in thedir:
