@@ -1,5 +1,5 @@
 from conans import ConanFile
-from conans.tools import download, unzip
+from conans.tools import download, unzip, replace_in_file
 import os
 import shutil
 from conans import CMake
@@ -50,10 +50,10 @@ class HPXConan(ConanFile):
         # Build
         
         # NO build examples nor tests
-        self.replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "if(HPX_BUILD_EXAMPLES)", "if(FALSE)")
-        self.replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "if(HPX_BUILD_DOCUMENTATION)", "if(FALSE)")
-        self.replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "if(HPX_BUILD_TESTS)", "if(FALSE)")
-        self.replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "if(HPX_BUILD_TOOLS)", "if(FALSE)")
+        replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "if(HPX_BUILD_EXAMPLES)", "if(FALSE)")
+        replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "if(HPX_BUILD_DOCUMENTATION)", "if(FALSE)")
+        replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "if(HPX_BUILD_TESTS)", "if(FALSE)")
+        replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "if(HPX_BUILD_TOOLS)", "if(FALSE)")
         
         
         #Hacks for link with out boost and hwloc
@@ -68,8 +68,8 @@ SET(Boost_SUBMINOR_VERSION 0)
         boost_include_dir = "SET(Boost_INCLUDE_DIR %s)" % self.get_include_dir("Boost")
         replace_line = "\n%s\n%s\n%s\n%s\n\n" % (boost_version, boost_found, boost_libraries, boost_include_dir)
         
-        self.replace_in_file("%s/cmake/HPX_SetupBoost.cmake" % self.folder, "find_package(Boost", "SET(DONTWANTTOFINDBOOST") # Not find boost, i have it
-        self.replace_in_file("%s/cmake/HPX_SetupBoost.cmake" % self.folder, "if(NOT Boost_FOUND)", "%sif(NOT Boost_FOUND)" % replace_line) # Not find boost, i have it
+        replace_in_file("%s/cmake/HPX_SetupBoost.cmake" % self.folder, "find_package(Boost", "SET(DONTWANTTOFINDBOOST") # Not find boost, i have it
+        replace_in_file("%s/cmake/HPX_SetupBoost.cmake" % self.folder, "if(NOT Boost_FOUND)", "%sif(NOT Boost_FOUND)" % replace_line) # Not find boost, i have it
         
         
         hwloc_found = "SET(HWLOC_FOUND TRUE)"
@@ -77,11 +77,11 @@ SET(Boost_SUBMINOR_VERSION 0)
         hwloc_include_dir = "SET(HWLOC_INCLUDE_DIR %s)" % self.get_include_dir("hwloc")
         replace_line = "\n%s\n%s\n%s\n\n" % (hwloc_found, hwloc_libraries, hwloc_include_dir)
         
-        self.replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "find_package(Hwloc)", 'MESSAGE("hwloc found by conan")\n%s' % replace_line) # Not find hwloc, i have it
+        replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "find_package(Hwloc)", 'MESSAGE("hwloc found by conan")\n%s' % replace_line) # Not find hwloc, i have it
         
         # OTHER REPLACES
-        self.replace_in_file("%s/src/CMakeLists.txt" % self.folder, "if(NOT MSVC)", "if(0)") # Not handle boost Boost_SYSTEM_LIBRARY_DEBUG or Boost_SYSTEM_SERIALIZATION_DEBUG
-        self.replace_in_file("%s/src/CMakeLists.txt" % self.folder, "${hpx_MALLOC_LIBRARY}", "${hpx_MALLOC_LIBRARY} %s" % serialization_lib_name) # Not append boost libs
+        replace_in_file("%s/src/CMakeLists.txt" % self.folder, "if(NOT MSVC)", "if(0)") # Not handle boost Boost_SYSTEM_LIBRARY_DEBUG or Boost_SYSTEM_SERIALIZATION_DEBUG
+        replace_in_file("%s/src/CMakeLists.txt" % self.folder, "${hpx_MALLOC_LIBRARY}", "${hpx_MALLOC_LIBRARY} %s" % serialization_lib_name) # Not append boost libs
         
         
         # CONFIGURE
