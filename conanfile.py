@@ -64,9 +64,8 @@ SET(Boost_MAJOR_VERSION 1)
 SET(Boost_MINOR_VERSION 57)
 SET(Boost_SUBMINOR_VERSION 0)
 '''
-        boost_include_dir = " ".join(self.deps_cpp_info["Boost"].include_paths).replace("\\", "/")
-        boost_libraries = " ".join(['"%s"' % lib for lib in self.deps_cpp_info["Boost"].libs])
-       
+        boost_libraries = "SET(Boost_LIBRARIES %s)" % " ".join(self.deps_cpp_info["Boost"].libs)
+        boost_include_dir = 'SET(Boost_INCLUDE_DIR "%s")' % " ".join(self.deps_cpp_info["Boost"].include_paths).replace("\\", "/")
         replace_line = "\n%s\n%s\n%s\n%s\n\n" % (boost_version, boost_found, boost_libraries, boost_include_dir)
         
         replace_in_file("%s/cmake/HPX_SetupBoost.cmake" % self.folder, "find_package(Boost", "SET(DONTWANTTOFINDBOOST") # Not find boost, i have it
@@ -74,8 +73,8 @@ SET(Boost_SUBMINOR_VERSION 0)
         
         
         hwloc_found = "SET(HWLOC_FOUND TRUE)"
-        hwloc_libraries = "SET(HWLOC_LIBRARIES %s)" % " ".join(self.deps_cpp_info.libs)
-        hwloc_include_dir = "SET(HWLOC_INCLUDE_DIR %s)" % self.get_include_dir("hwloc")
+        hwloc_libraries = "SET(HWLOC_LIBRARIES %s)" % " ".join(self.deps_cpp_info["hwloc"].libs)
+        hwloc_include_dir = "SET(HWLOC_INCLUDE_DIR %s)" %  " ".join(self.deps_cpp_info["hwloc"].include_paths).replace("\\", "/")
         replace_line = "\n%s\n%s\n%s\n\n" % (hwloc_found, hwloc_libraries, hwloc_include_dir)
         
         replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "find_package(Hwloc)", 'MESSAGE("hwloc found by conan")\n%s' % replace_line) # Not find hwloc, i have it
@@ -93,12 +92,6 @@ SET(Boost_SUBMINOR_VERSION 0)
         # BUILD
         cores = "-j3" if self.settings.os != "Windows" else ""
         self.run("cd %s/_build && cmake --build . %s -- %s" % (self.folder, cmake.build_config, cores))
-
-    def get_include_dir(self, require_name):
-        for thedir in self.deps_cpp_info.includedirs:
-            if require_name in thedir:
-                return thedir
-        return "" 
 
     def package(self):
         """ Define your conan structure: headers, libs and data. After building your
