@@ -69,9 +69,9 @@ SET(Boost_SUBMINOR_VERSION 0)
         replace_line = "\n%s\n%s\n%s\n%s\n\n" % (boost_version, boost_found, boost_libraries, boost_include_dir)
         
         replace_in_file("%s/cmake/HPX_SetupBoost.cmake" % self.folder, "find_package(Boost", "SET(DONTWANTTOFINDBOOST") # Not find boost, i have it
-        replace_in_file("%s/cmake/HPX_SetupBoost.cmake" % self.folder, "if(NOT Boost_FOUND)", "%sif(NOT Boost_FOUND)" % replace_line) # Not find boost, i have it
-        
-        
+        replace_in_file("%s/cmake/HPX_SetupBoost.cmake" % self.folder, "if(NOT Boost_FOUND)", "%sif(NOT Boost_FOUND)" % replace_line) # Not find boost, i have it        
+        replace_in_file("%s/cmake/HPX_SetupBoost.cmake" % self.folder, "hpx_library_dir(${Boost_LIBRARY_DIRS})", "hpx_libraries(${Boost_LIBRARIES})") # No auto-linking
+    
         hwloc_found = "SET(HWLOC_FOUND TRUE)"
         hwloc_libraries = "SET(HWLOC_LIBRARIES %s)" % " ".join(self.deps_cpp_info["hwloc"].libs)
         hwloc_include_dir = "SET(HWLOC_INCLUDE_DIR %s)" %  " ".join(self.deps_cpp_info["hwloc"].include_paths).replace("\\", "/")
