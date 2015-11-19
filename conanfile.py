@@ -64,8 +64,9 @@ SET(Boost_MAJOR_VERSION 1)
 SET(Boost_MINOR_VERSION 57)
 SET(Boost_SUBMINOR_VERSION 0)
 '''
-        boost_libraries = "SET(Boost_LIBRARIES %s)" % " ".join(self.deps_cpp_info.libs)
-        boost_include_dir = "SET(Boost_INCLUDE_DIR %s)" % self.get_include_dir("Boost")
+        boost_include_dir = " ".join(self.deps_cpp_info["Boost"].include_paths).replace("\\", "/")
+        boost_libraries = " ".join(['"%s"' % lib for lib in self.deps_cpp_info["Boost"].libs])
+       
         replace_line = "\n%s\n%s\n%s\n%s\n\n" % (boost_version, boost_found, boost_libraries, boost_include_dir)
         
         replace_in_file("%s/cmake/HPX_SetupBoost.cmake" % self.folder, "find_package(Boost", "SET(DONTWANTTOFINDBOOST") # Not find boost, i have it
