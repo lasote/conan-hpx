@@ -133,7 +133,8 @@ SET(Boost_SUBMINOR_VERSION 0)
             #self.cpp_info.libs.extend(["pthread","iostreams"])
             pass
         
-        self.cpp_info.cflags = ["-std=c++11"]
-        self.cpp_info.cppflags = ["-std=c++11"]
+        if self.settings.compiler != "Visual Studio":
+            self.cpp_info.cflags = ["-std=c++11"]
+            self.cpp_info.cppflags = ["-std=c++11"]
         
-        self.cpp_info.defines.extend(["HPX_COMPONENT_EXPORTS", "HPX_ENABLE_ASSERT_HANDLER"])
+        self.cpp_info.defines.extend(["HPX_COMPONENT_EXPORTS"])
