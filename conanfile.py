@@ -35,55 +35,27 @@ class HPXConan(ConanFile):
         """ Define your project building. You decide the way of building it
             to reuse it later in any other project.
         """
-        shutil.move("%s/CMakeLists.txt" % self.folder, "%s/CMakeListsOriginal.cmake" % self.folder)
-        shutil.move("CMakeLists.txt", "%s/CMakeLists.txt" % self.folder)
+        cmakelist_prepend = '''
+include(${CMAKE_CURRENT_SOURCE_DIR}/../conanbuildinfo.cmake)
+CONAN_BASIC_SETUP()
+option(HPX_BUILD_EXAMPLES BOOL OFF)
+option(HPX_BUILD_TESTS BOOL OFF)
+'''
+        
+        replace_in_file("%s/CMakeLists.txt" % self.folder, 'project(hpx CXX C)', 'project(hpx CXX C)\n%s' % cmakelist_prepend)
+        # Don't remove module path, keep the previous
+        replace_in_file("%s/CMakeLists.txt" % self.folder, 'set(CMAKE_MODULE_PATH', 'set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}')
         
         cmake = CMake(self.settings)
-        # Get boost serialization library name
-        serialization_lib_name = ""
-        for lib in self.deps_cpp_info.libs:
-            if "serialization" in lib: # From Boost dependency
-                serialization_lib_name = lib
-                break
-        
         
         # Build
-        
-        # NO build examples nor tests
-        replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "if(HPX_BUILD_EXAMPLES)", "if(FALSE)")
-        replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "if(HPX_BUILD_DOCUMENTATION)", "if(FALSE)")
-        replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "if(HPX_BUILD_TESTS)", "if(FALSE)")
-        replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "if(HPX_BUILD_TOOLS)", "if(FALSE)")
-        
-        
-        #Hacks for link with out boost and hwloc
-        boost_version = "SET(Boost_VERSION 105700)"
-        boost_found = '''SET(Boost_FOUND TRUE)
-SET(Boost_CONTEXT_FOUND TRUE)
-SET(Boost_MAJOR_VERSION 1)
-SET(Boost_MINOR_VERSION 57)
-SET(Boost_SUBMINOR_VERSION 0)
-'''
-        boost_libraries = "SET(Boost_LIBRARIES %s)" % " ".join(self.deps_cpp_info["Boost"].libs)
-        boost_include_dir = 'SET(Boost_INCLUDE_DIR "%s")' % " ".join(self.deps_cpp_info["Boost"].include_paths).replace("\\", "/")
-        replace_line = "\n%s\n%s\n%s\n%s\n\n" % (boost_version, boost_found, boost_libraries, boost_include_dir)
-        
-        replace_in_file("%s/cmake/HPX_SetupBoost.cmake" % self.folder, "find_package(Boost", "SET(DONTWANTTOFINDBOOST") # Not find boost, i have it
-        replace_in_file("%s/cmake/HPX_SetupBoost.cmake" % self.folder, "if(NOT Boost_FOUND)", "%sif(NOT Boost_FOUND)" % replace_line) # Not find boost, i have it        
-        replace_in_file("%s/cmake/HPX_SetupBoost.cmake" % self.folder, "hpx_library_dir(${Boost_LIBRARY_DIRS})", "hpx_libraries(${Boost_LIBRARIES})") # No auto-linking
-    
-        hwloc_found = "SET(HWLOC_FOUND TRUE)"
-        hwloc_libraries = "SET(HWLOC_LIBRARIES %s)" % " ".join(self.deps_cpp_info["hwloc"].libs)
-        hwloc_include_dir = "SET(HWLOC_INCLUDE_DIR %s)" %  " ".join(self.deps_cpp_info["hwloc"].include_paths).replace("\\", "/")
-        replace_line = "\n%s\n%s\n%s\n\n" % (hwloc_found, hwloc_libraries, hwloc_include_dir)
-        
-        replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "find_package(Hwloc)", 'MESSAGE("hwloc found by conan")\n%s' % replace_line) # Not find hwloc, i have it
-        
-        # OTHER REPLACES
-        replace_in_file("%s/src/CMakeLists.txt" % self.folder, "if(NOT MSVC)", "if(0)") # Not handle boost Boost_SYSTEM_LIBRARY_DEBUG or Boost_SYSTEM_SERIALIZATION_DEBUG
-        replace_in_file("%s/src/CMakeLists.txt" % self.folder, "${hpx_MALLOC_LIBRARY}", "${hpx_MALLOC_LIBRARY} %s" % serialization_lib_name) # Not append boost libs
-        
-        
+#         
+#         # NO build examples nor tests
+#         replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "if(HPX_BUILD_EXAMPLES)", "if(FALSE)")
+#         replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "if(HPX_BUILD_DOCUMENTATION)", "if(FALSE)")
+#         replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "if(HPX_BUILD_TESTS)", "if(FALSE)")
+#         replace_in_file("%s/CMakeListsOriginal.cmake" % self.folder, "if(HPX_BUILD_TOOLS)", "if(FALSE)")
+#     
         # CONFIGURE
         self.run("cd %s &&  mkdir _build" % self.folder)
         configure_command = 'cd %s/_build && cmake .. %s ' % (self.folder, cmake.command_line)
