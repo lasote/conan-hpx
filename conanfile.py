@@ -16,7 +16,7 @@ class HPXConan(ConanFile):
     requires = "Boost/1.57.0@lasote/stable", "hwloc/1.11.1@lasote/stable"
 
     def config(self):
-        pass
+        self.options["Boost/1.57.0"].shared = True
     
     def system_requirements(self):
         if self.settings.os == "Linux": # TODO: only apt
