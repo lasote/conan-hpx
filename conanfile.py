@@ -39,8 +39,8 @@ class HPXConan(ConanFile):
         cmakelist_prepend = '''
 include(${CMAKE_CURRENT_SOURCE_DIR}/../conanbuildinfo.cmake)
 CONAN_BASIC_SETUP()
-option(HPX_BUILD_EXAMPLES BOOL OFF)
-option(HPX_BUILD_TESTS BOOL OFF)
+option(HPX_WITH_EXAMPLES BOOL OFF)
+option(HPX_WITH_TESTS BOOL OFF)
 '''
         
         replace_in_file("%s/CMakeLists.txt" % self.folder, 'project(HPX CXX C)', 'project(HPX CXX C)\n%s' % cmakelist_prepend)
