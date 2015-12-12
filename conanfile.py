@@ -16,7 +16,8 @@ class HPXConan(ConanFile):
     requires = "Boost/1.57.0@lasote/stable", "hwloc/1.11.1@lasote/stable"
 
     def config(self):
-        self.options["Boost/1.57.0"].shared = True
+        # self.options["Boost/1.57.0"].shared = False
+        pass
     
     def system_requirements(self):
         if self.settings.os == "Linux": # TODO: only apt
@@ -45,6 +46,12 @@ option(HPX_BUILD_TESTS BOOL OFF)
         replace_in_file("%s/CMakeLists.txt" % self.folder, 'project(hpx CXX C)', 'project(hpx CXX C)\n%s' % cmakelist_prepend)
         # Don't remove module path, keep the previous
         replace_in_file("%s/CMakeLists.txt" % self.folder, 'set(CMAKE_MODULE_PATH', 'set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}')
+        # replace_in_file("%s/src/CMakeLists.txt" % self.folder, "if(NOT MSVC)", "if(0)") # Not handle boost Boost_SYSTEM_LIBRARY_DEBUG or Boost_SYSTEM_SERIALIZATION_DEBUG
+        
+        # Maybe make a PR providing a new option to disable autolink?  link against libraries not directories
+        replace_in_file("%s/cmake/HPX_SetupBoost.cmake" % self.folder, "hpx_library_dir(${Boost_LIBRARY_DIRS})", "hpx_libraries(${Boost_LIBRARIES})") # No auto-linking
+    
+        replace_in_file("%s/src/CMakeLists.txt" % self.folder, "${hpx_MALLOC_LIBRARY}", "${hpx_MALLOC_LIBRARY} ${Boost_SERIALIZATION_LIBRARY}") # Not append boost libs
         
         cmake = CMake(self.settings)
         
