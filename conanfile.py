@@ -7,16 +7,16 @@ from uuid import lib
 
 class HPXConan(ConanFile):
     name = "hpx"
-    version = "0.9.10"
+    version = "0.9.11"
     folder = "hpx_%s" % version
     settings = "os", "arch", "compiler", "build_type"
     exports = "CMakeLists.txt"
     generators = "cmake", "txt"
     url="http://github.com/lasote/conan-hpx"
-    requires = "Boost/1.57.0@lasote/stable", "hwloc/1.11.1@lasote/stable"
+    requires = "Boost/1.59.0@lasote/stable", "hwloc/1.11.1@lasote/stable"
 
     def config(self):
-        # self.options["Boost/1.57.0"].shared = False
+        # self.options["Boost"].shared = False
         pass
     
     def system_requirements(self):
@@ -43,7 +43,7 @@ option(HPX_BUILD_EXAMPLES BOOL OFF)
 option(HPX_BUILD_TESTS BOOL OFF)
 '''
         
-        replace_in_file("%s/CMakeLists.txt" % self.folder, 'project(hpx CXX C)', 'project(hpx CXX C)\n%s' % cmakelist_prepend)
+        replace_in_file("%s/CMakeLists.txt" % self.folder, 'project(HPX CXX C)', 'project(HPX CXX C)\n%s' % cmakelist_prepend)
         # Don't remove module path, keep the previous
         replace_in_file("%s/CMakeLists.txt" % self.folder, 'set(CMAKE_MODULE_PATH', 'set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}')
         # replace_in_file("%s/src/CMakeLists.txt" % self.folder, "if(NOT MSVC)", "if(0)") # Not handle boost Boost_SYSTEM_LIBRARY_DEBUG or Boost_SYSTEM_SERIALIZATION_DEBUG
