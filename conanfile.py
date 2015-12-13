@@ -108,10 +108,9 @@ option(HPX_WITH_TESTS BOOL OFF)
         
         if self.settings.os == "Linux":
             self.cpp_info.libs.extend(["dl","rt"])
-            pass
         
         if self.settings.compiler != "Visual Studio":
             self.cpp_info.cflags = ["-std=c++14"]
             self.cpp_info.cppflags = ["-std=c++14"]
         
-        self.cpp_info.defines.extend(["HPX_COMPONENT_EXPORTS"])
+        # self.cpp_info.defines.extend(["HPX_COMPONENT_EXPORTS"])
