@@ -49,9 +49,9 @@ option(HPX_WITH_TESTS BOOL OFF)
         # replace_in_file("%s/src/CMakeLists.txt" % self.folder, "if(NOT MSVC)", "if(0)") # Not handle boost Boost_SYSTEM_LIBRARY_DEBUG or Boost_SYSTEM_SERIALIZATION_DEBUG
         
         # Maybe make a PR providing a new option to disable autolink?  link against libraries not directories
-        replace_in_file("%s/cmake/HPX_SetupBoost.cmake" % self.folder, "hpx_library_dir(${Boost_LIBRARY_DIRS})", "hpx_libraries(${Boost_LIBRARIES})") # No auto-linking
-    
-        replace_in_file("%s/src/CMakeLists.txt" % self.folder, "${hpx_MALLOC_LIBRARY}", "${hpx_MALLOC_LIBRARY} ${Boost_SERIALIZATION_LIBRARY}") # Not append boost libs
+        if self.settings.os == "Windows":
+            replace_in_file("%s/cmake/HPX_SetupBoost.cmake" % self.folder, "hpx_library_dir(${Boost_LIBRARY_DIRS})", "hpx_libraries(${Boost_LIBRARIES})") # No auto-linking
+            replace_in_file("%s/src/CMakeLists.txt" % self.folder, "${hpx_MALLOC_LIBRARY}", "${hpx_MALLOC_LIBRARY} ${Boost_SERIALIZATION_LIBRARY}") # Not append boost libs
         
         cmake = CMake(self.settings)
         
@@ -95,12 +95,10 @@ option(HPX_WITH_TESTS BOOL OFF)
        
     def package_info(self):  
         # Windows removed (i think examples) => "ag" "cancelable_action" "jacobi_component" "managed_accumulator" and many others
-        self.cpp_info.libs = ["hpx", "hpx_init", "hpx_serialization", 
-                              "binpacking_factory", "component_storage", "distributing_factory",
-                              "iostreams",  "memory", "parcel_coalescing", "remote_object",
-                              "unordered", "vector"]
+        self.cpp_info.libs = ["hpx", "hpx_init", "hpx_component_storage", "hpx_iostreams",
+                              "hpx_partitioned_vector", "hpx_unordered"]
         
-	if self.settings.os == "Windows":
+        if self.settings.os == "Windows":
             self.cpp_info.libs.extend(["hpx_runtime"])
 
 
@@ -109,11 +107,11 @@ option(HPX_WITH_TESTS BOOL OFF)
             
         
         if self.settings.os == "Linux":
-            #self.cpp_info.libs.extend(["pthread","iostreams"])
+            self.cpp_info.libs.extend(["dl","rt"])
             pass
         
         if self.settings.compiler != "Visual Studio":
-            self.cpp_info.cflags = ["-std=c++11"]
-            self.cpp_info.cppflags = ["-std=c++11"]
+            self.cpp_info.cflags = ["-std=c++14"]
+            self.cpp_info.cppflags = ["-std=c++14"]
         
         self.cpp_info.defines.extend(["HPX_COMPONENT_EXPORTS"])
