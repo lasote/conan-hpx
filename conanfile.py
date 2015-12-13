@@ -99,7 +99,7 @@ option(HPX_WITH_TESTS BOOL OFF)
                               "hpx_partitioned_vector", "hpx_unordered"]
         
         if self.settings.os == "Windows":
-            self.cpp_info.libs.extend(["hpx_runtime"])
+            self.cpp_info.libs.extend(["shlwapi", "psapi", "dbghelp", "hpx_runtime", "hpx_parcel_coalescing", "hpx_memory"])
 
 
         if self.settings.build_type == "Debug":
